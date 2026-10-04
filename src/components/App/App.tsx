@@ -7,8 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useDebouncedCallback } from "use-debounce";
 
-import { fetchNotes, createNote, deleteNote } from "../../services/noteService";
-import type { NewNote } from "../../services/noteService";
+import { fetchNotes, deleteNote } from "../../services/noteService";
 
 import NoteList from "../NoteList/NoteList";
 import SearchBox from "../SearchBox/SearchBox";
@@ -42,29 +41,15 @@ function App() {
     debouncedSearchHandler(value);
   };
 
-  const createMutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["notes"],
-      });
-
-      setIsModalOpen(false);
-    },
-  });
-
   const deleteMutation = useMutation({
     mutationFn: deleteNote,
+
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["notes"],
       });
     },
   });
-
-  const handleCreateNote = (values: NewNote) => {
-    createMutation.mutate(values);
-  };
 
   const handleDeleteNote = (id: string) => {
     deleteMutation.mutate(id);
@@ -106,11 +91,7 @@ function App() {
 
       {isModalOpen && (
         <Modal onClose={closeModal}>
-          <NoteForm
-            onClose={closeModal}
-            onSubmit={handleCreateNote}
-            isSubmitting={createMutation.isPending}
-          />
+          <NoteForm onClose={closeModal} />
         </Modal>
       )}
     </div>
