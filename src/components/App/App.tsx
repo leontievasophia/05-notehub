@@ -1,13 +1,8 @@
 import { useState } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  keepPreviousData,
-} from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDebouncedCallback } from "use-debounce";
 
-import { fetchNotes, deleteNote } from "../../services/noteService";
+import { fetchNotes } from "../../services/noteService";
 
 import NoteList from "../NoteList/NoteList";
 import SearchBox from "../SearchBox/SearchBox";
@@ -23,8 +18,6 @@ function App() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const queryClient = useQueryClient();
-
   const { data, isLoading, isError } = useQuery({
     queryKey: ["notes", page, debouncedSearch],
     queryFn: () => fetchNotes(page, debouncedSearch),
@@ -39,20 +32,6 @@ function App() {
   const handleSearchChange = (value: string) => {
     setSearch(value);
     debouncedSearchHandler(value);
-  };
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteNote,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["notes"],
-      });
-    },
-  });
-
-  const handleDeleteNote = (id: string) => {
-    deleteMutation.mutate(id);
   };
 
   const openModal = () => {
@@ -85,9 +64,7 @@ function App() {
 
       {isError && <p>Something went wrong.</p>}
 
-      {data && data.notes.length > 0 && (
-        <NoteList notes={data.notes} onDelete={handleDeleteNote} />
-      )}
+      {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
 
       {isModalOpen && (
         <Modal onClose={closeModal}>
